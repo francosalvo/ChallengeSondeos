@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,7 +60,25 @@ public class librosController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se pudo guardar el libro");
         }
     }
-
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateLibro(@PathVariable Integer id, @RequestBody Libro libroActualizado) {
+        try {
+            Optional<Libro> libroOptional = libroRepository.findById(id);
+            if (libroOptional.isPresent()) {
+                Libro libro = libroOptional.get();
+                libro.setTitulo(libroActualizado.getTitulo());
+                libro.setAutor(libroActualizado.getAutor());
+                libroRepository.save(libro);
+                return ResponseEntity.ok("Libro actualizado exitosamente");
+            } else {
+                throw new NoSuchElementException("Libro no encontrado");
+            }
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se pudo actualizar el libro");
+        }
+    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteLibro(@PathVariable Integer id) {
         try {
